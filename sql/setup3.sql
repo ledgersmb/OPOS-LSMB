@@ -29,12 +29,12 @@ BEGIN
      INSERT INTO parts 
             (id, partnumber, description, 
             inventory_accno_id, expense_accno_id, income_accno_id,
-            sellprice, lastcost)
+            sellprice, lastcost, onhand)
      VALUES (currval('parts_id_seq'), new.code, new.name,
              (setting_get('inventory_accno_id')).value,
              (setting_get('expense_accno_id')).value,
              (setting_get('income_accno_id')).value,
-             new.pricesell, new.pricebuy);
+             new.pricesell, new.pricebuy, stockvolume);
 
      UPDATE parts_opos SET being_written = false WHERE product_id = new.id;
   ELSE
@@ -46,13 +46,60 @@ BEGIN
      UPDATE parts 
         SET partnumber = new.code,
             description = new.name,
-            sellprice = new.pricesell
+            sellprice = new.pricesell,
+            onhand = new.stocklevel
       WHERE id = join_rec.parts_id;
 
      UPDATE parts_opos SET being_written = false WHERE product_id = new.id;
+  END IF;
+  RETURN NEW;
+END;
 $$;
 
-CREATE TRIGGER sync_lsmb AFTER INSERT TO products
+CREATE TRIGGER sync_lsmb AFTER INSERT OR UPDATE TO products
 FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_sync_parts();
+
+CREATE OR REPLACE UNCTION opos_integration.lsmb_sync_parts() RETURNS TRIGGER
+LANGUAGE PLPGSQL AS
+$$
+DECLARE
+  join_rec parts_opos;
+BEGIN
+  SELECT * INTO join_rec FROM opos_integration.parts_opos 
+   WHERE parts_id = new.id;
+
+  IF FOUND THEN
+     IF join_rec.being_written IS TRUE THEN
+         return new;
+     END IF;
+     UPDATE opos_integration.parts_opos SET being_written = true
+      WHERE parts_id = new.id;
+
+     UPDATE products
+        SET name = new.description,
+            pricesell = new.sellprice,
+            stocklevel = new.onhand
+      WHERE id = join_rec.products_id;
+
+     UPDATE opos_integration.parts_opos SET being_written = false
+      WHERE parts_id = new.id;
+  ELSE
+     INSERT INTO opos_integration.parts_opos
+     VALUES (new.id, new.id::text || new.partnumber, true);
+
+     INSERT INTO product
+            (id, 
+            code, reference, name, 
+            pricesell, pricebuy, onhand)
+     VALUES (new.id, new.id::text || new.partnumber,
+             new.partnumber, new.partnumber, new.description, 
+             new.sellprice, new.lastcost, new.onhand);
+     
+     UPDATE opos_integration.parts_opos SET being_written = false
+      WHERE parts_id = new.id;
+  END IF;
+  RETURN NEW;
+END;
+$$;
 
 COMMIT;

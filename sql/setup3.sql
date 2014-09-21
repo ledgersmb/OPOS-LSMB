@@ -216,7 +216,7 @@ FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_sync_customers();
 
 CREATE TRIGGER sync_opos AFTER INSERT OR UPDATE ON entity_credit_account
 FOR EACH ROW 
-WHEN (entity_class = 2)
+WHEN (new.entity_class = 2)
 EXECUTE PROCEDURE opos_integration.lsmb_sync_customers();
 
 -- INVOICES

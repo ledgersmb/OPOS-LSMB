@@ -14,10 +14,10 @@ CREATE TABLE opos_integration.parts_opos (
 );
 
 CREATE OR REPLACE FUNCTION opos_integration.opos_sync_parts() RETURNS TRIGGER
-LANUAGE PLPGSQL AS
+LANGUAGE PLPGSQL AS
 $$
 DECLARE
-  join_rec parts_opos;
+  join_rec opos_integration.parts_opos;
 BEGIN
   SELECT * INTO join_rec FROM opos_integration.parts_opos 
    WHERE product_id = new.id;
@@ -31,18 +31,18 @@ BEGIN
             inventory_accno_id, expense_accno_id, income_accno_id,
             sellprice, lastcost, onhand)
      VALUES (currval('parts_id_seq'), new.code, new.name,
-             (setting_get('inventory_accno_id')).value,
-             (setting_get('expense_accno_id')).value,
-             (setting_get('income_accno_id')).value,
-             new.pricesell, new.pricebuy, stockvolume);
+             (setting_get('inventory_accno_id')).value::int,
+             (setting_get('expense_accno_id')).value::int,
+             (setting_get('income_accno_id')).value::int,
+             new.pricesell, new.pricebuy, new.stockvolume);
 
-     UPDATE parts_opos SET being_written = false WHERE product_id = new.id;
+     UPDATE opos_integration.parts_opos SET being_written = false WHERE product_id = new.id;
   ELSE
      IF join_rec.being_written IS TRUE THEN
          return new;
      END IF;
 
-     UPDATE parts_opos SET being_written = true WHERE product_id = new.id;
+     UPDATE opos_integration.parts_opos SET being_written = true WHERE product_id = new.id;
      UPDATE parts 
         SET partnumber = new.code,
             description = new.name,
@@ -50,20 +50,20 @@ BEGIN
             onhand = new.stocklevel
       WHERE id = join_rec.parts_id;
 
-     UPDATE parts_opos SET being_written = false WHERE product_id = new.id;
+     UPDATE opos_integration.parts_opos SET being_written = false WHERE product_id = new.id;
   END IF;
   RETURN NEW;
 END;
 $$;
 
-CREATE TRIGGER sync_lsmb AFTER INSERT OR UPDATE TO products
+CREATE TRIGGER sync_lsmb AFTER INSERT OR UPDATE ON products
 FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_sync_parts();
 
-CREATE OR REPLACE UNCTION opos_integration.lsmb_sync_parts() RETURNS TRIGGER
+CREATE OR REPLACE FUNCTION opos_integration.lsmb_sync_parts() RETURNS TRIGGER
 LANGUAGE PLPGSQL AS
 $$
 DECLARE
-  join_rec parts_opos;
+  join_rec opos_integration.parts_opos;
 BEGIN
   SELECT * INTO join_rec FROM opos_integration.parts_opos 
    WHERE parts_id = new.id;
@@ -101,5 +101,8 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+CREATE TRIGGER sync_opos AFTER INSERT OR UPDATE ON parts
+FOR EACH ROW EXECUTE PROCEDURE opos_integration.lsmb_sync_parts();
 
 COMMIT;

@@ -127,7 +127,7 @@ DECLARE
     eca_id int;
 BEGIN
    SELECT * INTO join_rec FROM opos_integration.customer_opos 
-    where customer_id = new.id;
+    where customers_id = new.id;
 
    IF NOT FOUND THEN
       INSERT INTO opos_integration.customer_opos 
@@ -139,39 +139,41 @@ BEGIN
        return new;
    END IF;
 
-   SELECT c INTO default_curr FROM unnest(setting__get_currencies()) c LIMIT 1;
-   SELECT * INTO eca WHERE id = join_rec.credit_id;
-   SELECT * INTO c WHERE entity = eca.entity_id;
-   SELECT * INTO cc WHERE name = new.country OR short_name = new.country;
+   SELECT curr INTO default_curr 
+     FROM unnest(setting__get_currencies()) curr LIMIT 1;
+   SELECT * INTO eca FROM entity_credit_account WHERE id = join_rec.credit_id;
+   SELECT * INTO c FROM company WHERE entity_id = eca.entity_id;
+   SELECT * INTO cc FROM country
+    WHERE name = new.country OR short_name = new.country;
 
    UPDATE opos_integration.customer_opos SET being_written=true
-    WHERE customer_id = new.id;
+    WHERE customers_id = new.id;
 
    SELECT * INTO eca_id
-     FROM  entity__save_credit(eca.id, 2, 
+     FROM  eca__save(eca.id, 2, 
                               coalesce (eca.entity_id,
-                              (SELECT company__save(c.id, new.id, 2, new.name,
+                              (SELECT (company__save(c.id, new.id, 2, new.name,
                                                     new.taxid, eca.entity_id, 
-                                                    c.sic, cc.id, null, null))),
-                              new.name, eca.discount, eca.taxincluded, 
-                              new.maxdebt, eca.discount_terms, eca.terms, 
-                              new.searchkey, eca.business_id, eca.language_code,
+                                                    c.sic_code, cc.id, null, null)).entity_id )),
+                              new.name::text, eca.discount, eca.taxincluded, 
+                              new.maxdebt::numeric, eca.discount_terms, eca.terms, 
+                              new.searchkey::text, eca.business_id, eca.language_code,
                               eca.pricegroup_id, 
                               COALESCE(eca.curr, default_curr), 
-                              COALESCE(eca.start_date, now()::date), null, 
+                              COALESCE(eca.startdate, now()::date), null, 
                               eca.threshold, 
-                              coalesce(eca.ar_ap_accno_id, 
+                              coalesce(eca.ar_ap_account_id, 
                                        (select account_id from account_link
                                          where description = 'AR'
                                       ORDER BY account_id asc limit 1)),
                               eca.cash_account_id, new.name, 
-                              eca.tax_form_id, eca.discount_account_id
+                              eca.taxform_id, eca.discount_account_id
    );
 
    UPDATE opos_integration.customer_opos 
       SET being_written=false,
           credit_id = eca_id
-    WHERE customer_id = new.id;
+    WHERE customers_id = new.id;
    RETURN NEW;
 END;
 $$;
@@ -191,16 +193,16 @@ BEGIN
  
       UPDATE customers
          SET name = e.name,
-             search_key = eca.meta_number,
+             searchkey = eca.meta_number,
              taxid = c.tax_id,
              maxdebt = eca.creditlimit
        WHERE id = join_rec.customers_id;
    ELSE 
       INSERT INTO customers
-             (name, search_key, taxid, maxdebt)
-      SELECT e.name, eca.meta_number, c.tax_id, eca.creditimit
+             (id, name, searchkey, taxid, maxdebt)
+      SELECT e.name || eca.meta_number, e.name, eca.meta_number, c.tax_id, eca.creditlimit
         FROM entity_credit_account eca
-        JOIN entity e ON e.id = eca.credit_id
+        JOIN entity e ON e.id = eca.entity_id
    LEFT JOIN company c ON c.entity_id = eca.entity_id;
    END IF;
 

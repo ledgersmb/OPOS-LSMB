@@ -131,7 +131,7 @@ BEGIN
 
    IF NOT FOUND THEN
       INSERT INTO opos_integration.customer_opos 
-             (customers_id, being_written)
+             (customers_id, credit_id, being_written)
       values (new.id, true);
    END IF;
 
@@ -183,8 +183,10 @@ RETURNS TRIGGER LANGUAGE PLPGSQL AS
 $$
 DECLARE join_rec opos_integration.customer_opos;
 BEGIN
-   SELECT * INTO join_rec FROM opos_integration.customer_opos 
-    WHERE credit_id = new.id;
+   SELECT * INTO join_rec 
+     FROM opos_integration.customer_opos 
+     JOIN entity e ON customers_id = e.control_code
+     JOIN entity_credit_account eca ON e.id = eca.entity_id AND eca.id = new.id;
 
    IF FOUND THEN
       IF join_rec.being_written IS TRUE THEN
@@ -200,7 +202,7 @@ BEGIN
    ELSE 
       INSERT INTO customers
              (id, name, searchkey, taxid, maxdebt)
-      SELECT e.name || eca.meta_number, e.name, eca.meta_number, c.tax_id, eca.creditlimit
+      SELECT e.control_code || eca.meta_number, e.name, eca.meta_number, c.tax_id, eca.creditlimit
         FROM entity_credit_account eca
         JOIN entity e ON e.id = eca.entity_id
    LEFT JOIN company c ON c.entity_id = eca.entity_id;

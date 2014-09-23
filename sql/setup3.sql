@@ -86,7 +86,7 @@ BEGIN
      UPDATE products
         SET name = new.description,
             pricesell = new.sellprice,
-            stocklevel = new.onhand
+            stockvolume = new.onhand
       WHERE id = join_rec.products_id;
 
      UPDATE opos_integration.parts_opos SET being_written = false
@@ -95,13 +95,13 @@ BEGIN
      INSERT INTO opos_integration.parts_opos
      VALUES (new.id, new.id::text || new.partnumber, true);
 
-     INSERT INTO product
+     INSERT INTO products
             (id, 
             code, reference, name, 
-            pricesell, pricebuy, onhand)
-     VALUES (new.id, new.id::text || new.partnumber,
+            pricesell, pricebuy,stockvolume, category, taxcat)
+     VALUES (new.id::text || new.partnumber,
              new.partnumber, new.partnumber, new.description, 
-             new.sellprice, new.lastcost, new.onhand);
+             new.sellprice, new.lastcost, new.onhand, '000', '001');
      
      UPDATE opos_integration.parts_opos SET being_written = false
       WHERE parts_id = new.id;
@@ -111,7 +111,8 @@ END;
 $$;
 
 CREATE TRIGGER sync_opos AFTER INSERT OR UPDATE ON parts
-FOR EACH ROW EXECUTE PROCEDURE opos_integration.lsmb_sync_parts();
+FOR EACH ROW WHEN (new.description IS NOT NULL)
+EXECUTE PROCEDURE opos_integration.lsmb_sync_parts();
 
 -- CUSTOMERS
 

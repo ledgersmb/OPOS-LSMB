@@ -232,6 +232,50 @@ EXECUTE PROCEDURE opos_integration.lsmb_sync_customers();
 
 -- INVOICES
 
+CREATE TABLE opos_integration.invoice_opos (
+   id int unique,
+   tickets_id text unique,
+   being_written bool not null default true
+); 
+
+CREATE OR REPLACE FUNCTION opos_integration.opos_sync_invoices
+RETURNS TRIGGER LANGUAGE PLPGSQL AS 
+$$
+DECLARE join_rec opos_integration.invoice_opos;
+BEGIN
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION opos_integration.lsmb_sync_invoices
+RETURNS TRIGGER LANGUAGE PLPGSQL AS 
+$$
+DECLARE join_rec opos_integration.invoice_opos;
+BEGIN
+END;
+$$;
+
+--CREATE TRIGGER;
+--CREATE TRIGGER;
+
+CREATE OR REPLACE FUNCTION opos_integration.opos_sync_invoice_line
+RETURNS TRIGGER LANGUAGE PLPGSQL AS 
+$$
+DECLARE join_rec opos_integration.invoice_opos;
+BEGIN
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION opos_integration.lsmb_sync_invoice_line
+RETURNS TRIGGER LANGUAGE PLPGSQL AS 
+$$
+DECLARE join_rec opos_integration.invoice_opos;
+BEGIN
+END;
+$$;
+
+--CREATE TRIGGER;
+--CREATE TRIGGER;
+
 -- PAYMENTS
 
 COMMIT;

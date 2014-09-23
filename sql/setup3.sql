@@ -201,11 +201,17 @@ BEGIN
              maxdebt = eca.creditlimit
        WHERE id = join_rec.customers_id;
    ELSE 
+      INSERT INTO opos_integration.customer_opos
+             (customers_id, credit_id, being_written)
+      SELECT e.control_code || new.meta_number, new.id, true
+        FROM entity e where e.id = new.entity_id;
+
       INSERT INTO customers
              (id, name, searchkey, taxid, maxdebt)
-      SELECT e.control_code || eca.meta_number, e.name, eca.meta_number, c.tax_id, eca.creditlimit
+      SELECT e.control_code || eca.meta_number, e.name, eca.meta_number, 
+             c.tax_id, coalesce(eca.creditlimit, 0)
         FROM entity_credit_account eca
-        JOIN entity e ON e.id = eca.entity_id
+        JOIN entity e ON e.id = eca.entity_id AND eca.id = new.id
    LEFT JOIN company c ON c.entity_id = eca.entity_id;
    END IF;
 

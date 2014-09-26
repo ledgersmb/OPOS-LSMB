@@ -87,7 +87,7 @@ BEGIN
         SET name = new.description,
             pricesell = new.sellprice,
             stockvolume = new.onhand
-      WHERE id = join_rec.products_id;
+      WHERE id = join_rec.product_id;
 
      UPDATE opos_integration.parts_opos SET being_written = false
       WHERE parts_id = new.id;
@@ -281,13 +281,25 @@ BEGIN
 END;
 $$;
 
---CREATE TRIGGER;
+CREATE TRIGGER lsmb_save_ar AFTER INSERT ON tickets 
+FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_sync_invoices();
 
 CREATE OR REPLACE FUNCTION opos_integration.opos_sync_invoice_line
 RETURNS TRIGGER LANGUAGE PLPGSQL AS 
 $$
 DECLARE join_rec opos_integration.invoice_opos;
 BEGIN
+   SELECT * INTO join_rec FROM opos_integration.invoice_opos
+    WHERE ticket_id = new.ticket;
+   IF NOT FOUND THEN
+      RAISE EXCEPTION 'Invoice not found';
+   END IF;
+   PERFORM invoice__add_item_ar(
+       join_rec.id, po.parts_id, new.units::numeric, 0, 0, new.price::numeric
+   )
+    FROM opos_integration.parts_opos po
+   WHERE new.product = po.product_id;
+   RETURN NEW;
 END;
 $$;
 

@@ -243,18 +243,27 @@ RETURNS TRIGGER LANGUAGE PLPGSQL AS
 $$
 DECLARE join_rec opos_integration.invoice_opos;
 BEGIN
+   SELECT * INTO join_rec FROM opos_integration.invoice_opos 
+    WHERE tickets_id = new.id;
+
+   IF NOT FOUND THEN
+      INSERT INTO opos_integration.invoice_opos
+             (id, tickets_id, being_written)
+      VALUES (currval('id')::int, new.id, true);
+      INSERT INTO ar (entity_credit_account, invnumber, transdate, amount, curr)
+      SELECT co.credit_id, new.ticketid, now(), 0, setting__get_default_curr()
+        FROM opos_integration.customer_opos co
+       WHERE co.customers_id = new.customer;
+
+      IF NOT FOUND THEN
+          RAISE EXCEPTION 'CUSTOMER NOT FOUND';
+      END IF;
+   END IF;
+
+   RETURN NEW;
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION opos_integration.lsmb_sync_invoices
-RETURNS TRIGGER LANGUAGE PLPGSQL AS 
-$$
-DECLARE join_rec opos_integration.invoice_opos;
-BEGIN
-END;
-$$;
-
---CREATE TRIGGER;
 --CREATE TRIGGER;
 
 CREATE OR REPLACE FUNCTION opos_integration.opos_sync_invoice_line
@@ -265,15 +274,6 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION opos_integration.lsmb_sync_invoice_line
-RETURNS TRIGGER LANGUAGE PLPGSQL AS 
-$$
-DECLARE join_rec opos_integration.invoice_opos;
-BEGIN
-END;
-$$;
-
---CREATE TRIGGER;
 --CREATE TRIGGER;
 
 -- PAYMENTS

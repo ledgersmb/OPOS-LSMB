@@ -238,15 +238,32 @@ CREATE TABLE opos_integration.invoice_opos (
    being_written bool not null default true
 ); 
 
+CREATE TABLE opos_integration.batch (
+  id int unique;
+);
+
 CREATE OR REPLACE FUNCTION opos_integration.opos_sync_invoices
 RETURNS TRIGGER LANGUAGE PLPGSQL AS 
 $$
 DECLARE join_rec opos_integration.invoice_opos;
+        batch_id int;
 BEGIN
    SELECT * INTO join_rec FROM opos_integration.invoice_opos 
     WHERE tickets_id = new.id;
 
    IF NOT FOUND THEN
+      SELECT max(id) INTO batch_id from opos_integration.batch;
+      PERFORM id FROM batch WHERE id = batch_id 
+          AND approved_by IS NULL AND locked_by IS NULL;
+      IF NOT FOUND THEN
+          DELETE FROM opos_integration.batch;
+          INSERT INTO opos_integration.batch (id)
+          VALUES batch_create(new.id, 'opos invoice batch', 2, now()::date);
+          SELECT max(id) INTO batch_id from opos_integration.batch;
+      END IF;
+
+       
+
       INSERT INTO opos_integration.invoice_opos
              (id, tickets_id, being_written)
       VALUES (currval('id')::int, new.id, true);

@@ -284,7 +284,7 @@ $$;
 CREATE TRIGGER lsmb_save_ar AFTER INSERT ON tickets 
 FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_sync_invoices();
 
-CREATE OR REPLACE FUNCTION opos_integration.opos_sync_invoice_line
+CREATE OR REPLACE FUNCTION opos_integration.opos_sync_invoice_line()
 RETURNS TRIGGER LANGUAGE PLPGSQL AS 
 $$
 DECLARE join_rec opos_integration.invoice_opos;
@@ -303,7 +303,8 @@ BEGIN
 END;
 $$;
 
---CREATE TRIGGER;
+CREATE TRIGGER BEFORE INSERT ON ticketlines
+FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_sync_invoice_line();
 
 -- PAYMENTS
 

@@ -239,10 +239,10 @@ CREATE TABLE opos_integration.invoice_opos (
 ); 
 
 CREATE TABLE opos_integration.batch (
-  id int unique;
+  id int unique
 );
 
-CREATE OR REPLACE FUNCTION opos_integration.opos_sync_invoices
+CREATE OR REPLACE FUNCTION opos_integration.opos_sync_invoices()
 RETURNS TRIGGER LANGUAGE PLPGSQL AS 
 $$
 DECLARE join_rec opos_integration.invoice_opos;
@@ -258,7 +258,7 @@ BEGIN
       IF NOT FOUND THEN
           DELETE FROM opos_integration.batch;
           INSERT INTO opos_integration.batch (id)
-          VALUES batch_create(new.id, 'opos invoice batch', 2, now()::date);
+          VALUES (batch_create(new.id, 'opos invoice batch', 2, now()::date));
           SELECT max(id) INTO batch_id from opos_integration.batch;
       END IF;
 
@@ -303,7 +303,7 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER BEFORE INSERT ON ticketlines
+CREATE TRIGGER opos_sync_ticketlines BEFORE INSERT ON ticketlines
 FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_sync_invoice_line();
 
 -- PAYMENTS

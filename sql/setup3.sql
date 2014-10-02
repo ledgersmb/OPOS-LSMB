@@ -258,7 +258,7 @@ BEGIN
       IF NOT FOUND THEN
           DELETE FROM opos_integration.batch;
           INSERT INTO opos_integration.batch (id)
-          VALUES (batch_create(new.id, 'opos invoice batch', 2, now()::date));
+          VALUES (batch_create(new.id, 'opos invoice batch', 'ar', now()::date));
           SELECT max(id) INTO batch_id from opos_integration.batch;
       END IF;
 

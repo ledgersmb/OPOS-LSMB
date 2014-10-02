@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION invoice__start_ap
 (in_invnumber text, in_transdate date, in_taxincluded bool, 
  in_amount numeric, in_netamount numeric, in_paid numeric, in_datepaid date,
  in_duedate date, in_invoice bool, in_curr char(3), person_id int,
- in_till varchar(20), in_department_id int, in_approved bool, 
+ in_till varchar(20), in_approved bool, 
  in_entity_credit_account int, in_ar_accno text)
 RETURNS int LANGUAGE SQL AS
 $$
@@ -12,19 +12,19 @@ $$
         (invnumber, transdate, taxincluded,
          amount, netamount, paid, datepaid,
          duedate, invoice, curr, person_id,
-         till, department_id, approved, entity_credit_account)
+         till, approved, entity_credit_account)
  VALUES ($1, $2, coalesce($3, 'f'),
          $4,$5, $6, coalesce($7, 'today'),
          coalesce($8, 'today'), $9, coalesce($10,
          (select defaults_get_defaultcurrency from
           defaults_get_defaultcurrency())),
          coalesce($11, person__get_my_entity_id()),
-         $12, $13, coalesce($14, true), $15);
+         $12, coalesce($13, true), $14);
 
  INSERT INTO acc_trans
         (trans_id, transdate, chart_id, amount, approved)
  SELECT currval('id')::int, $2, a.id, $4, true
-   FROM account a WHERE accno = $16;
+   FROM account a WHERE accno = $15;
 
  SELECT currval('id')::int;
 $$;
@@ -33,7 +33,7 @@ CREATE OR REPLACE FUNCTION invoice__start_ar
 (in_invnumber text, in_transdate date, in_taxincluded bool, 
  in_amount numeric, in_netamount numeric, in_paid numeric, in_datepaid date,
  in_duedate date, in_invoice bool, in_curr char(3), person_id int,
- in_till varchar(20), in_department_id int, in_approved bool, 
+ in_till varchar(20), in_approved bool, 
  in_entity_credit_account int, in_ar_accno text)
 RETURNS int LANGUAGE SQL AS
 $$
@@ -41,19 +41,19 @@ $$
         (invnumber, transdate, taxincluded,
          amount, netamount, paid, datepaid,
          duedate, invoice, curr, person_id,
-         till, department_id, approved, entity_credit_account)
+         till, approved, entity_credit_account)
  VALUES ($1, $2, coalesce($3, 'f'),
          $4,$5, $6, coalesce($7, 'today'),
          coalesce($8, 'today'), $9, coalesce($10, 
          (select defaults_get_defaultcurrency from 
           defaults_get_defaultcurrency())), 
          coalesce($11, person__get_my_entity_id()), 
-         $12, $13, coalesce($14, true), $15);
+         $12, coalesce($13, true), $14);
 
  INSERT INTO acc_trans
         (trans_id, transdate, chart_id, amount, approved)
  SELECT currval('id')::int, $2, a.id, $4 * -1, true
-   FROM account a WHERE accno = $16;
+   FROM account a WHERE accno = $15;
 
  SELECT currval('id')::int;
 $$;
@@ -62,7 +62,7 @@ COMMENT ON FUNCTION invoice__start_ar
 (in_invnumber text, in_transdate date, in_taxincluded bool, 
  in_amount numeric, in_netamount numeric, in_paid numeric, in_datepaid date,
  in_duedate date, in_invoice bool, in_curr char(3), person_id int,
- in_till varchar(20), in_department_id int, in_approved bool, 
+ in_till varchar(20), in_approved bool, 
  in_entity_credit_account int, in_ar_accno text) 
 IS $$ Saves an ar transaction header.  The following fields are optional:
 

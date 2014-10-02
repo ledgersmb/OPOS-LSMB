@@ -266,9 +266,11 @@ BEGIN
 
       INSERT INTO opos_integration.invoice_opos
              (id, tickets_id, being_written)
-      VALUES (currval('id')::int, new.id, true);
-      INSERT INTO ar (entity_credit_account, invnumber, transdate, amount, curr)
-      SELECT co.credit_id, new.ticketid, now(), 0, setting__get_default_curr()
+      VALUES (nextval('id')::int, new.id, true);
+      INSERT INTO ar (id, entity_credit_account, invnumber, transdate, amount, 
+             curr)
+      SELECT currval('id')::int, co.credit_id, new.ticketid, now(), 0, 
+             setting__get_default_curr()
         FROM opos_integration.customer_opos co
        WHERE co.customers_id = new.customer;
 

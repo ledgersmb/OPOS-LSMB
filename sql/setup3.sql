@@ -247,6 +247,7 @@ RETURNS TRIGGER LANGUAGE PLPGSQL AS
 $$
 DECLARE join_rec opos_integration.invoice_opos;
         batch_id int;
+        default_eca entity_credit_account;
 BEGIN
    SELECT * INTO join_rec FROM opos_integration.invoice_opos 
     WHERE tickets_id = new.id;
@@ -262,21 +263,29 @@ BEGIN
           SELECT max(id) INTO batch_id from opos_integration.batch;
       END IF;
 
-       
+      SELECT eca.* INTO default_eca
+        FROM entity_credit_account eca
+        JOIN opos_integration.customer_opos co ON (co.credit_id = eca.id)
+       WHERE co.customers_id = new.customer;
+      
+      IF NOT FOUND THEN
+          SELECT * INTO default_eca
+            FROM entity_credit_account 
+           WHERE entity_class = 2 AND meta_number = 'opos';
+      END IF;
+      IF default_eca.id IS NULL THEN
+          RAISE EXCEPTION 'CUSTOMER NOT FOUND';
+      END IF;
 
       INSERT INTO opos_integration.invoice_opos
              (id, tickets_id, being_written)
       VALUES (nextval('id')::int, new.id, true);
       INSERT INTO ar (id, entity_credit_account, invnumber, transdate, amount, 
              curr)
-      SELECT currval('id')::int, co.credit_id, new.ticketid, now(), 0, 
-             setting__get_default_curr()
-        FROM opos_integration.customer_opos co
-       WHERE co.customers_id = new.customer;
+      SELECT currval('id')::int, default_eca.id,
+             new.ticketid, now(), 0, 
+             defaults_get_defaultcurrency();
 
-      IF NOT FOUND THEN
-          RAISE EXCEPTION 'CUSTOMER NOT FOUND';
-      END IF;
    END IF;
 
    RETURN NEW;
@@ -292,7 +301,7 @@ $$
 DECLARE join_rec opos_integration.invoice_opos;
 BEGIN
    SELECT * INTO join_rec FROM opos_integration.invoice_opos
-    WHERE ticket_id = new.ticket;
+    WHERE tickets_id = new.ticket;
    IF NOT FOUND THEN
       RAISE EXCEPTION 'Invoice not found';
    END IF;

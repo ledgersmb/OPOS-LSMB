@@ -242,6 +242,23 @@ CREATE TABLE opos_integration.batch (
   id int unique
 );
 
+CREATE OR REPLACE FUNCTION opos_integration.lsmb_rotate_invoice_batch()
+RETURNS trigger LANGUAGE PLPGSQL AS
+$$
+SELECT invoice__finalize_ar(ar.id)
+  FROM  opos_integration.batch ib
+  JOIN public.batch b ON ib.id = b.id and b.id = new.id
+  JOIN voucher v ON v.batch_id = b.id
+  JOIN ar ON v.trans_id = b.id;
+
+DELETE FROM opos_integration.batch WHERE id = new.id;
+RETURN new;
+$$;
+
+CREATE TRIGGER BEFORE UPDATE TO batch
+FOR EACH ROW WHEN locked_by IS NOT NULL
+EXECUTE PROCEDURE lsmb_rotate_invoice_batch();
+
 CREATE OR REPLACE FUNCTION opos_integration.opos_sync_invoices()
 RETURNS TRIGGER LANGUAGE PLPGSQL AS 
 $$
@@ -306,8 +323,10 @@ BEGIN
       RAISE EXCEPTION 'Invoice not found';
    END IF;
    PERFORM invoice__add_item_ar(
-       join_rec.id, po.parts_id, new.units::numeric, 0, 0, new.price::numeric
+       join_rec.id, po.parts_id, new.units::numeric, 0::numeric, ''::text, 
+       new.price::numeric
    )
+   DELETE FROM acc_trans WHERE trans_id = join_rec.id; 
     FROM opos_integration.parts_opos po
    WHERE new.product = po.product_id;
    RETURN NEW;

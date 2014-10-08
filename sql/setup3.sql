@@ -338,4 +338,20 @@ FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_sync_invoice_line();
 
 -- PAYMENTS
 
+CREATE TABLE opos_integration.payment_batch (
+   id int,
+   created timestamp
+);
+
+CREATE OR REPLACE FUNCTION opos_integration.lsmb_rotate_payment_batch()
+RETURNS trigger LANGUAGE PLPGSQL AS
+$$
+DELETE FROM opos_integration.payment_batch WHERE id = new.id;
+RETURN new;
+$$;
+
+CREATE TRIGGER BEFORE UPDATE TO batch
+FOR EACH ROW WHEN locked_by IS NOT NULL
+EXECUTE PROCEDURE lsmb_rotate_payment_batch();
+
 COMMIT;

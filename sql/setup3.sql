@@ -354,4 +354,34 @@ CREATE TRIGGER BEFORE UPDATE TO batch
 FOR EACH ROW WHEN locked_by IS NOT NULL
 EXECUTE PROCEDURE lsmb_rotate_payment_batch();
 
+CREATE OR REPLACE FUNCTION opos_integration.opos_payment_to_voucher()
+RETURNS TRIGGER LANGUAGE PLPGSQL AS
+$$
+DECLARE batch_row opos_integration.payment_batch;
+        join_rec  opos_integration.invoice_opos;
+BEGIN
+  SELECT * INTO batch_row FROM opos_integration.payment_batch;
+  IF NOT FOUND THEN
+     INSERT INTO opos_integration.payment_batch(id, created)
+     VALUES (batch_create(....), now());
+     SELECT * INTO batch_row FROM opos_integration.payment_batch;
+  END IF;
+
+  SELECT * FROM invoice_opos where tickets_id  = new.receipt;
+
+  INSERT INTO voucher (batch_id, batch_class, trans_id)
+  values (batch_row.id, 3, join_rec.id);
+
+  INSERT INTO acc_trans 
+         (approved, trans_id, chart_id, amount, transdate, voucher_id)
+  VALUES ('f', join_rec.id, (setting_get('opos_ar')).value, 
+         new.total, now()::date, currval('voucher_id_seq')::int),
+         ('f',  join_rec.id, (setting_get('opos_cash')).value
+         -1 * new.total,  now()::date, currval('voucher_id_seq')::int);
+END;
+$$;
+
+CREATE TRIGGER opos_sync_payments AFTER INSERT TO payments
+FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_payment_to_voucher();
+
 COMMIT;

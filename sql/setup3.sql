@@ -298,10 +298,14 @@ BEGIN
              (id, tickets_id, being_written)
       VALUES (nextval('id')::int, new.id, true);
       INSERT INTO ar (id, entity_credit_account, invnumber, transdate, amount, 
-             curr)
+             curr, approved)
       SELECT currval('id')::int, default_eca.id,
              new.ticketid, now(), 0, 
-             defaults_get_defaultcurrency();
+             defaults_get_defaultcurrency(), False;
+
+      INSERT INTO voucher (trans_id, batch_id, batch_class)
+      SELECT currval('id')::int, id, 2
+        FROM opos_integration.batch;
 
    END IF;
 

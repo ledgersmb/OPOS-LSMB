@@ -265,7 +265,7 @@ $$;
 
 CREATE TRIGGER rotate_opos_batch BEFORE UPDATE ON batch
 FOR EACH ROW 
-EXECUTE PROCEDURE lsmb_rotate_invoice_batch();
+EXECUTE PROCEDURE opos_integration.lsmb_rotate_invoice_batch();
 
 CREATE OR REPLACE FUNCTION opos_integration.opos_sync_invoices()
 RETURNS TRIGGER LANGUAGE PLPGSQL AS 

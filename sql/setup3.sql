@@ -263,7 +263,7 @@ RETURN new;
 END;
 $$;
 
-CREATE TRIGGER rotate_opos_batch BEFORE UPDATE TO batch
+CREATE TRIGGER rotate_opos_batch BEFORE UPDATE ON batch
 FOR EACH ROW WHEN locked_by IS NOT NULL
 EXECUTE PROCEDURE lsmb_rotate_invoice_batch();
 
@@ -362,7 +362,7 @@ DELETE FROM opos_integration.payment_batch WHERE id = new.id;
 RETURN new;
 $$;
 
-CREATE TRIGGER BEFORE UPDATE TO batch
+CREATE TRIGGER BEFORE UPDATE ON batch
 FOR EACH ROW WHEN locked_by IS NOT NULL
 EXECUTE PROCEDURE lsmb_rotate_payment_batch();
 
@@ -393,7 +393,7 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER opos_sync_payments AFTER INSERT TO payments
+CREATE TRIGGER opos_sync_payments AFTER INSERT ON payments
 FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_payment_to_voucher();
 
 COMMIT;

@@ -357,8 +357,10 @@ CREATE TABLE opos_integration.payment_batch (
 CREATE OR REPLACE FUNCTION opos_integration.lsmb_rotate_payment_batch()
 RETURNS trigger LANGUAGE PLPGSQL AS
 $$
+BEGIN
 DELETE FROM opos_integration.payment_batch WHERE id = new.id;
 RETURN new;
+END;
 $$;
 
 CREATE TRIGGER rotate_opos_payments BEFORE UPDATE ON batch

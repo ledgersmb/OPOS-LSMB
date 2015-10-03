@@ -365,7 +365,7 @@ $$;
 
 CREATE TRIGGER rotate_opos_payments BEFORE UPDATE ON batch
 FOR EACH ROW 
-EXECUTE PROCEDURE lsmb_rotate_payment_batch();
+EXECUTE PROCEDURE opos_integration.lsmb_rotate_payment_batch();
 
 CREATE OR REPLACE FUNCTION opos_integration.opos_payment_to_voucher()
 RETURNS TRIGGER LANGUAGE PLPGSQL AS

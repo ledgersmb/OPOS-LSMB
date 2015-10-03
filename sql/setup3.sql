@@ -338,7 +338,6 @@ BEGIN
        join_rec.id, po.parts_id, new.units::numeric, 0::numeric, ''::text, 
        new.price::numeric
    )
-   DELETE FROM acc_trans WHERE trans_id = join_rec.id; 
     FROM opos_integration.parts_opos po
    WHERE new.product = po.product_id;
    RETURN NEW;

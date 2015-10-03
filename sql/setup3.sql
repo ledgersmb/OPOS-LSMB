@@ -245,7 +245,14 @@ CREATE TABLE opos_integration.batch (
 CREATE OR REPLACE FUNCTION opos_integration.lsmb_rotate_invoice_batch()
 RETURNS trigger LANGUAGE PLPGSQL AS
 $$
-SELECT invoice__finalize_ar(ar.id)
+BEGIN
+PERFORM * FROM opos_integration.batch
+  WHERE id = new.id;
+IF NOT FOUND THEN
+    RETURN NEW;
+END IF;
+
+PERFORM invoice__finalize_ar(ar.id)
   FROM  opos_integration.batch ib
   JOIN public.batch b ON ib.id = b.id and b.id = new.id
   JOIN voucher v ON v.batch_id = b.id
@@ -253,9 +260,10 @@ SELECT invoice__finalize_ar(ar.id)
 
 DELETE FROM opos_integration.batch WHERE id = new.id;
 RETURN new;
+END;
 $$;
 
-CREATE TRIGGER BEFORE UPDATE TO batch
+CREATE TRIGGER rotate_opos_batch BEFORE UPDATE TO batch
 FOR EACH ROW WHEN locked_by IS NOT NULL
 EXECUTE PROCEDURE lsmb_rotate_invoice_batch();
 
@@ -367,7 +375,7 @@ BEGIN
   SELECT * INTO batch_row FROM opos_integration.payment_batch;
   IF NOT FOUND THEN
      INSERT INTO opos_integration.payment_batch(id, created)
-     VALUES (batch_create(....), now());
+     VALUES (batch_create('opos-' || now()::timestamp::text, 'OPOS invoice batch', 'ar', now()::date), now());
      SELECT * INTO batch_row FROM opos_integration.payment_batch;
   END IF;
 

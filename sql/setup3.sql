@@ -132,7 +132,7 @@ BEGIN
 
    IF NOT FOUND THEN
       INSERT INTO opos_integration.customer_opos 
-             (customers_id, credit_id, being_written)
+             (customers_id, being_written)
       values (new.id, true);
    END IF;
 

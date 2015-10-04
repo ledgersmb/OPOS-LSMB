@@ -40,8 +40,6 @@ CREATE TABLE applications (
 );
 
 
-ALTER TABLE public.applications OWNER TO chris;
-
 --
 -- Name: attribute; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -51,8 +49,6 @@ CREATE TABLE attribute (
     name character varying NOT NULL
 );
 
-
-ALTER TABLE public.attribute OWNER TO chris;
 
 --
 -- Name: attributeinstance; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -66,8 +62,6 @@ CREATE TABLE attributeinstance (
 );
 
 
-ALTER TABLE public.attributeinstance OWNER TO chris;
-
 --
 -- Name: attributeset; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -77,8 +71,6 @@ CREATE TABLE attributeset (
     name character varying NOT NULL
 );
 
-
-ALTER TABLE public.attributeset OWNER TO chris;
 
 --
 -- Name: attributesetinstance; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -90,8 +82,6 @@ CREATE TABLE attributesetinstance (
     description character varying
 );
 
-
-ALTER TABLE public.attributesetinstance OWNER TO chris;
 
 --
 -- Name: attributeuse; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -105,8 +95,6 @@ CREATE TABLE attributeuse (
 );
 
 
-ALTER TABLE public.attributeuse OWNER TO chris;
-
 --
 -- Name: attributevalue; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -117,8 +105,6 @@ CREATE TABLE attributevalue (
     value character varying
 );
 
-
-ALTER TABLE public.attributevalue OWNER TO chris;
 
 --
 -- Name: breaks; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -131,8 +117,6 @@ CREATE TABLE breaks (
     visible boolean NOT NULL
 );
 
-
-ALTER TABLE public.breaks OWNER TO chris;
 
 --
 -- Name: categories; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -148,8 +132,6 @@ CREATE TABLE categories (
 );
 
 
-ALTER TABLE public.categories OWNER TO chris;
-
 --
 -- Name: closedcash; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -163,8 +145,6 @@ CREATE TABLE closedcash (
     nosales integer DEFAULT 0 NOT NULL
 );
 
-
-ALTER TABLE public.closedcash OWNER TO chris;
 
 --
 -- Name: csvimport; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -184,8 +164,6 @@ CREATE TABLE csvimport (
     category character varying
 );
 
-
-ALTER TABLE public.csvimport OWNER TO chris;
 
 --
 -- Name: customers; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -219,8 +197,6 @@ CREATE TABLE customers (
 );
 
 
-ALTER TABLE public.customers OWNER TO chris;
-
 --
 -- Name: draweropened; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -232,8 +208,6 @@ CREATE TABLE draweropened (
 );
 
 
-ALTER TABLE public.draweropened OWNER TO chris;
-
 --
 -- Name: floors; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -244,8 +218,6 @@ CREATE TABLE floors (
     image bytea
 );
 
-
-ALTER TABLE public.floors OWNER TO chris;
 
 --
 -- Name: leaves; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -261,8 +233,6 @@ CREATE TABLE leaves (
 );
 
 
-ALTER TABLE public.leaves OWNER TO chris;
-
 --
 -- Name: lineremoved; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -277,8 +247,6 @@ CREATE TABLE lineremoved (
 );
 
 
-ALTER TABLE public.lineremoved OWNER TO chris;
-
 --
 -- Name: locations; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -289,8 +257,6 @@ CREATE TABLE locations (
     address character varying
 );
 
-
-ALTER TABLE public.locations OWNER TO chris;
 
 --
 -- Name: moorers; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -303,8 +269,6 @@ CREATE TABLE moorers (
     power boolean DEFAULT false NOT NULL
 );
 
-
-ALTER TABLE public.moorers OWNER TO chris;
 
 --
 -- Name: payments; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -323,8 +287,6 @@ CREATE TABLE payments (
 );
 
 
-ALTER TABLE public.payments OWNER TO chris;
-
 --
 -- Name: people; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -340,8 +302,6 @@ CREATE TABLE people (
 );
 
 
-ALTER TABLE public.people OWNER TO chris;
-
 --
 -- Name: pickup_number; Type: SEQUENCE; Schema: public; Owner: chris
 --
@@ -353,8 +313,6 @@ CREATE SEQUENCE pickup_number
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE public.pickup_number OWNER TO chris;
 
 --
 -- Name: places; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -372,8 +330,6 @@ CREATE TABLE places (
     tablemoved boolean DEFAULT false NOT NULL
 );
 
-
-ALTER TABLE public.places OWNER TO chris;
 
 --
 -- Name: products; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -408,8 +364,6 @@ CREATE TABLE products (
 );
 
 
-ALTER TABLE public.products OWNER TO chris;
-
 --
 -- Name: products_cat; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -419,8 +373,6 @@ CREATE TABLE products_cat (
     catorder integer
 );
 
-
-ALTER TABLE public.products_cat OWNER TO chris;
 
 --
 -- Name: products_com; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -432,8 +384,6 @@ CREATE TABLE products_com (
     product2 character varying NOT NULL
 );
 
-
-ALTER TABLE public.products_com OWNER TO chris;
 
 --
 -- Name: receipts; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -448,8 +398,6 @@ CREATE TABLE receipts (
 );
 
 
-ALTER TABLE public.receipts OWNER TO chris;
-
 --
 -- Name: reservation_customers; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -459,8 +407,6 @@ CREATE TABLE reservation_customers (
     customer character varying NOT NULL
 );
 
-
-ALTER TABLE public.reservation_customers OWNER TO chris;
 
 --
 -- Name: reservations; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -477,8 +423,6 @@ CREATE TABLE reservations (
 );
 
 
-ALTER TABLE public.reservations OWNER TO chris;
-
 --
 -- Name: resources; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -491,8 +435,6 @@ CREATE TABLE resources (
 );
 
 
-ALTER TABLE public.resources OWNER TO chris;
-
 --
 -- Name: roles; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -503,8 +445,6 @@ CREATE TABLE roles (
     permissions bytea
 );
 
-
-ALTER TABLE public.roles OWNER TO chris;
 
 --
 -- Name: sharedtickets; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -519,8 +459,6 @@ CREATE TABLE sharedtickets (
 );
 
 
-ALTER TABLE public.sharedtickets OWNER TO chris;
-
 --
 -- Name: shift_breaks; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -534,8 +472,6 @@ CREATE TABLE shift_breaks (
 );
 
 
-ALTER TABLE public.shift_breaks OWNER TO chris;
-
 --
 -- Name: shifts; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -548,8 +484,6 @@ CREATE TABLE shifts (
 );
 
 
-ALTER TABLE public.shifts OWNER TO chris;
-
 --
 -- Name: stockcurrent; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -561,8 +495,6 @@ CREATE TABLE stockcurrent (
     units double precision DEFAULT 0 NOT NULL
 );
 
-
-ALTER TABLE public.stockcurrent OWNER TO chris;
 
 --
 -- Name: stockdiary; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -581,8 +513,6 @@ CREATE TABLE stockdiary (
 );
 
 
-ALTER TABLE public.stockdiary OWNER TO chris;
-
 --
 -- Name: stocklevel; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -596,8 +526,6 @@ CREATE TABLE stocklevel (
 );
 
 
-ALTER TABLE public.stocklevel OWNER TO chris;
-
 --
 -- Name: taxcategories; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -608,8 +536,6 @@ CREATE TABLE taxcategories (
 );
 
 
-ALTER TABLE public.taxcategories OWNER TO chris;
-
 --
 -- Name: taxcustcategories; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -619,8 +545,6 @@ CREATE TABLE taxcustcategories (
     name character varying NOT NULL
 );
 
-
-ALTER TABLE public.taxcustcategories OWNER TO chris;
 
 --
 -- Name: taxes; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -638,8 +562,6 @@ CREATE TABLE taxes (
 );
 
 
-ALTER TABLE public.taxes OWNER TO chris;
-
 --
 -- Name: taxlines; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -652,8 +574,6 @@ CREATE TABLE taxlines (
     amount double precision DEFAULT 0 NOT NULL
 );
 
-
-ALTER TABLE public.taxlines OWNER TO chris;
 
 --
 -- Name: thirdparties; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
@@ -676,8 +596,6 @@ CREATE TABLE thirdparties (
 );
 
 
-ALTER TABLE public.thirdparties OWNER TO chris;
-
 --
 -- Name: ticketlines; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -694,8 +612,6 @@ CREATE TABLE ticketlines (
 );
 
 
-ALTER TABLE public.ticketlines OWNER TO chris;
-
 --
 -- Name: tickets; Type: TABLE; Schema: public; Owner: chris; Tablespace: 
 --
@@ -710,8 +626,6 @@ CREATE TABLE tickets (
 );
 
 
-ALTER TABLE public.tickets OWNER TO chris;
-
 --
 -- Name: ticketsnum; Type: SEQUENCE; Schema: public; Owner: chris
 --
@@ -723,8 +637,6 @@ CREATE SEQUENCE ticketsnum
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE public.ticketsnum OWNER TO chris;
 
 --
 -- Name: ticketsnum_payment; Type: SEQUENCE; Schema: public; Owner: chris
@@ -738,8 +650,6 @@ CREATE SEQUENCE ticketsnum_payment
     CACHE 1;
 
 
-ALTER TABLE public.ticketsnum_payment OWNER TO chris;
-
 --
 -- Name: ticketsnum_refund; Type: SEQUENCE; Schema: public; Owner: chris
 --
@@ -751,8 +661,6 @@ CREATE SEQUENCE ticketsnum_refund
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE public.ticketsnum_refund OWNER TO chris;
 
 --
 -- Data for Name: applications; Type: TABLE DATA; Schema: public; Owner: chris

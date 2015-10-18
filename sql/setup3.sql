@@ -252,11 +252,6 @@ IF NOT FOUND THEN
     RETURN NEW;
 END IF;
 
-PERFORM invoice__finalize_ar(ar.id)
-  FROM  opos_integration.batch ib
-  JOIN public.batch b ON ib.id = b.id and b.id = new.id
-  JOIN voucher v ON v.batch_id = b.id
-  JOIN ar ON v.trans_id = b.id;
 
 DELETE FROM opos_integration.batch WHERE id = new.id;
 RETURN new;
@@ -340,6 +335,8 @@ BEGIN
    )
     FROM opos_integration.parts_opos po
    WHERE new.product = po.product_id;
+
+   PERFORM invoice__finalize_ar(join_rec.id); -- update totals
    RETURN NEW;
 END;
 $$;

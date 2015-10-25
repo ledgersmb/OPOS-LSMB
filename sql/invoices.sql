@@ -129,6 +129,36 @@ VALUES ($1, (select id from account where accno = $2), coalesce($4, 'today'), $5
 SELECT TRUE;
 $$;
 
+CREATE OR REPLACE FUNCTION invoice__update_summary_payment_ar(in_id int)
+returns numeric LANGUAGE SQL SECURITY DEFINER AS
+$$
+
+DELETE FROM acc_trans 
+ WHERE trans_id = $1 and chart_id = (select ar_ap_account_id
+                                       from entity_credit_account 
+                                      where id = (select entity_credit_account
+                                                    from ar where id = $1));
+
+INSERT INTO acc_trans (chart_id, amount, invoice_id, trans_id, transdate, memo)
+SELECT p.inventory_accno_id, i.qty * i.sellprice, i.id, i.trans_id, now()::date, 'invenory'
+  FROM invoice i
+  JOIN parts p ON i.parts_id = p.id
+ WHERE i.trans_id = $1 AND i.id NOT IN (select invoice_id from acc_trans
+                                         WHERE trans_id = $1);
+UPDATE ar SET amount = (SELECT sum(a.amount)
+                          FROM acc_trans a WHERE trans_id = $1)
+ WHERE id = $1;
+
+INSERT INTO acc_trans (chart_id, trans_id, amount, transdate, memo)
+SELECT eca.ar_ap_account_id, $1, ar.amount * -1, 'today', 'credit'
+  FROM entity_credit_account eca
+  JOIN ar ON eca.id = ar.entity_credit_account
+ WHERE ar.id = $1;
+
+SELECT amount from ar where id = $1;
+
+$$;
+
 CREATE OR REPLACE FUNCTION invoice__add_payment_ap
 (in_id int, in_ap_accno text, in_cash_accno text, in_transdate date,
 in_source text, in_memo text, in_amount numeric)

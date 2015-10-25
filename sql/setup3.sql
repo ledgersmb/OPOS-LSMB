@@ -336,7 +336,7 @@ BEGIN
     FROM opos_integration.parts_opos po
    WHERE new.product = po.product_id;
 
-   PERFORM invoice__finalize_ar(join_rec.id); -- update totals
+   PERFORM invoice__update_summary_payment_ar(join_rec.id); -- update totals
    RETURN NEW;
 END;
 $$;

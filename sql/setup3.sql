@@ -394,4 +394,30 @@ $$;
 CREATE TRIGGER opos_sync_payments AFTER INSERT ON payments
 FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_payment_to_voucher();
 
+-- tax line sync
+
+CREATE OR REPLACE FUNCTION opos_integration.opos_taxe_line_sync()
+RETURNS trigger LANGUAGE PLPGSQL AS
+$$
+DECLARE join_rec opos_integration.invoice_opos;
+BEGIN
+   SELECT * INTO join_rec FROM opos_integration.invoice_opos
+    WHERE tickets_id = new.receipt;
+   IF NOT FOUND THEN
+      RAISE EXCEPTION 'Invoice not found';
+   END IF;
+   INSERT INTO acc_trans(chart_id, amount, transdate, approved, trans_id)
+   SELECT ac.id, t.amount, 'today', true, join_rec.id
+     FROM taxlines t
+LEFT JOIN account ac ON t.taxid = ac.accno -- so it dies hard if no corresponding tax exists
+    WHERE t.id = new.id and amount <> 0;
+     
+   PERFORM invoice__update_summary_payment_ar(join_rec.id); -- update totals
+   RETURN NEW;
+END;
+$$;
+
+CREATE trigger opos_sync_taxline AFTER INSERT ON taxlines
+FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_taxe_line_sync(); 
+
 COMMIT;

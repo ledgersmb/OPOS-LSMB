@@ -41,7 +41,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION lsmb_opos__grant_perms
+CREATE OR REPLACE FUNCTION lsmb_pos__grant_perms
 (in_role text, in_table text, in_perms text) RETURNS BOOL
 SECURITY INVOKER
 LANGUAGE PLPGSQL AS

@@ -5,15 +5,15 @@
 
 BEGIN;
 
-CREATE SCHEMA opos_integration;
+CREATE SCHEMA IF NOT EXISTS opos_integration;
 
-CREATE TABLE opos_integration.parts_opos (
+CREATE TABLE IF NOT EXISTS opos_integration.parts_opos (
    parts_id int UNIQUE,
    product_id text UNIQUE,
    being_written bool not null default true
 );
 
-CREATE TABLE opos_integration.customer_opos (
+CREATE TABLE IF NOT EXISTS opos_integration.customer_opos (
    credit_id int unique,
    customers_id text unique,
    being_written bool not null default true
@@ -419,5 +419,30 @@ $$;
 
 CREATE trigger opos_sync_taxline AFTER INSERT ON taxlines
 FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_taxe_line_sync(); 
+
+-- tax rate sync
+
+CREATE OR REPLACE FUNCTION opos_integration.opos_tax_rate_sync()
+RETURNS TRIGGER LANGUAGE PLPGSQL AS
+$$
+BEGIN
+    IF new.validto < 'infinity' THEN
+        RETURN NEW;
+    END IF;
+    UPDATE taxes
+       SET rate = new.rate
+     WHERE id = (select accno from account where id = new.chart_id);
+    IF FOUND THEN
+       RETURN NEW;
+    END IF;
+    INSERT INTO taxes (category, id, name, rate, ratecascade)
+    SELECT '001', accno, description, new.rate, false
+      FROM account where id = new.chart_id;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER sync_tax_to_opos AFTER INSERT OR UPDATE ON tax
+FOR EACH ROW EXECUTE PROCEDURE opos_integration.opos_tax_rate_sync();
 
 COMMIT;

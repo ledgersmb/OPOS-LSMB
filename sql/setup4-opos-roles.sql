@@ -57,6 +57,23 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION lsmb_pos__grant_all_tables
+(in_role text, in_schema text, in_perms text)
+RETURNS BOOL SECURITY INVOKER LANGUAGE PLPGSQL AS
+$$
+BEGIN
+   IF upper(in_perms) NOT IN ('ALL', 'INSERT', 'UPDATE', 'SELECT', 'DELETE') THEN
+      RAISE EXCEPTION 'Invalid permission';
+   END IF;
+   EXECUTE 'GRANT USAGE ON SCHEMA ' ||  quote_ident(in_schema) 
+   || ' TO ' ||  quote_ident(lsmb__role(in_role));
+   EXECUTE 'GRANT ' || in_perms || ' ON ALL TABLES IN SCHEMA ' || quote_ident(in_schema)
+   || ' TO ' ||  quote_ident(lsmb__role(in_role));
+
+   RETURN TRUE;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION quote_ident_array(text[]) returns text[]
 language sql as $$
    SELECT array_agg(quote_ident(e))
@@ -108,7 +125,6 @@ SELECT lsmb_pos__grant_perms('pos_user', 'reservation_customers', 'ALL');
 SELECT lsmb_pos__grant_perms('pos_user', 'reservations', 'ALL');
 SELECT lsmb_pos__grant_perms('pos_user', 'resources', 'ALL');
 SELECT lsmb_pos__grant_perms('pos_user', 'roles', 'ALL');
-SELECT lsmb_pos__grant_perms('pos_user', 'shared_tickets', 'ALL');
 SELECT lsmb_pos__grant_perms('pos_user', 'shift_breaks', 'ALL');
 SELECT lsmb_pos__grant_perms('pos_user', 'shifts', 'ALL');
 SELECT lsmb_pos__grant_perms('pos_user', 'stockcurrent', 'ALL');
@@ -124,5 +140,6 @@ SELECT lsmb_pos__grant_perms('pos_user', 'tickets', 'ALL');
 SELECT lsmb_pos__grant_perms('pos_user', 'ticketsnum', 'ALL');
 SELECT lsmb_pos__grant_perms('pos_user', 'ticketsnum_payment', 'ALL');
 SELECT lsmb_pos__grant_perms('pos_user', 'ticketsnum_refund', 'ALL');
+SELECT lsmb_pos__grant_all_tables('pos_user', 'opos_integration', 'ALL');
 
 COMMIT;
